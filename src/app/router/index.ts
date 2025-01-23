@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import UmsRouter from '@/app/ums/ums.routing.ts';
+import UmsRouter from '../ums/ums.routing.ts';
 import MainLayout from '@/app/base/main/main.layout.vue';
 import MainPage from '@/app/base/main/main.page.vue';
-// import LoginPage from '@/app/ums/login/login.page.vue';
 import { useAuthStore } from '@/app/stores/auth.store.ts';
 
 const routes = [
@@ -29,13 +28,13 @@ const router = createRouter({
 });
 
 // Navigation Guard
-// router.beforeEach((to, from, next) => {
-//   const authStore = useAuthStore();
-//   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-//     next({ name: 'Login', query: { redirect: to.fullPath } });  // jika tidak authorized, redirect ke halaman login
-//   } else {
-//     next();  // jika authorized atau tidak butuh authorization, lanjutkan
-//   }
-// });
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ name: 'Login', query: { redirect: to.fullPath } });  // jika tidak authorized, redirect ke halaman login
+  } else {
+    next();  // jika authorized atau tidak butuh authorization, lanjutkan
+  }
+});
 
 export default router;
