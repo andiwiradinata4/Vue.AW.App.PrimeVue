@@ -1,130 +1,71 @@
 <template>
-    <awLabel v-if="showLabel" :id="name" :label="label" :required="required" :loading="loading" />
-    <div v-if="loading" class="animate-pulse h-9 mt-3 bg-slate-400 rounded-lg"></div>
-    <div v-else>
-        <DatePicker v-model="computedValue" showIcon iconDisplay="input" :timeOnly="timeOnly" :showTime="showTime"
-            :hourFormat="hourFormat" :dateFormat="formatValue" :minDate="computedMinValue" :maxDate="computedMaxValue"
-            :name="name" :inputId="name" showButtonBar fluid>
-            <template #inputicon="slotProps" v-if="useCustomIcon">
-                <slot :name="name + 'icon'" :clickCallback="slotProps.clickCallback">
-                    <i :class="customIcon" @click="slotProps.clickCallback" />
-                </slot>
-            </template>
-        </DatePicker>
-    </div>
+    <awLabel v-if="fieldElement.ShowLabel" :id="fieldElement.Name" :label="fieldElement.Label"
+        :required="fieldElement.Required" :loading="fieldElement.Loading" />
+    <Skeleton v-if="fieldElement.Loading" height="2rem" />
+    <DatePicker v-else v-model="computedValue" :showIcon="fieldElement.ShowIcon" iconDisplay="input"
+        :timeOnly="fieldElement.TimeOnly" :showTime="fieldElement.ShowTime" :hourFormat="fieldElement.HourFormat"
+        :dateFormat="fieldElement.FormatValue" :minDate="computedMinValue" :maxDate="computedMaxValue"
+        :name="fieldElement.Name" :inputId="fieldElement.Name" :disabled="fieldElement.Disabled"
+        :placeholder="fieldElement.PlaceHolder" showButtonBar fluid>
+        <template #inputicon="slotProps" v-if="fieldElement.ShowCustomIcon">
+            <slot :name="fieldElement.Name + 'icon'" :clickCallback="slotProps.clickCallback">
+                <i :class="fieldElement.CustomIcon" @click="slotProps.clickCallback" />
+            </slot>
+        </template>
+    </DatePicker>
+
 </template>
 
 <script lang="ts">
     import { ref, watch, defineComponent, computed } from 'vue';
     import DatePicker from 'primevue/datepicker';
+    import Skeleton from 'primevue/skeleton';
     import awLabel from './awLabel.vue';
-
+    import { FieldElementItem } from '../models/fieldelementitem';
     export default defineComponent({
         name: 'awDatePicker',
-        components: { DatePicker, awLabel },
+        components: { DatePicker, Skeleton, awLabel },
         props: {
-            name: {
-                type: String,
+            fieldElement: {
+                type: FieldElementItem,
                 required: true
-            },
-            label: {
-                type: String,
-                default: ''
-            },
-            showLabel: {
-                type: Boolean,
-                default: false
-            },
-            formatValue: {
-                type: String,
-                default: 'mm/dd/yy'
-            },
-            minValue: {
-                type: [Date, String, null],
-                default: null
-            },
-            maxValue: {
-                type: [Date, String, null],
-                default: null
-            },
-            customIcon: {
-                type: String,
-                default: ''
-            },
-            useCustomIcon: {
-                type: Boolean,
-                default: false
-            },
-            modelValue: {
-                type: [Date, String, null],
-                default: null
-            },
-            visible: {
-                type: Boolean,
-                default: true
-            },
-            timeOnly: {
-                type: Boolean,
-                default: false
-            },
-            showTime: {
-                type: Boolean,
-                default: true
-            },
-            hourFormat: {
-                type: String as () => "24" | "12" | undefined,
-                default: '24'
-            },
-            required: {
-                type: Boolean,
-                default: false
-            },
-            loading: {
-                type: Boolean,
-                default: false
             }
         },
 
         emits: ['update:modelValue'],
 
         setup(props, { emit }: any) {
-            const localValue = ref<Date | string | null>(props.modelValue);
-
+            const localValue = ref<Date | string | null>(props.fieldElement.Value);
             const computedValue = computed({
                 get: () => {
                     // Convert string to Date if necessary  
-                    if (typeof props.modelValue === 'string') {
-                        return new Date(props.modelValue);
+                    if (typeof props.fieldElement.Value === 'string') {
+                        return new Date(props.fieldElement.Value);
                     }
-                    return props.modelValue;
+                    return props.fieldElement.Value;
                 },
                 set: (value) => {
+                    props.fieldElement.Value = value;
                     emit('update:modelValue', value);
-                    // // Convert Date back to string if necessary  
-                    // if (value instanceof Date) {
-                    //     emit('update:modelValue', value.toISOString()); // or format as needed  
-                    // } else {
-                    //     emit('update:modelValue', value);
-                    // }
                 }
             });
 
             const computedMinValue = computed(() => {
-                if (props.minValue) {
-                    return new Date(props.minValue);
+                if (props.fieldElement.MinValue) {
+                    return new Date(props.fieldElement.MinValue);
                 }
                 return undefined;
             })
 
             const computedMaxValue = computed(() => {
-                if (props.maxValue) {
-                    return new Date(props.maxValue);
+                if (props.fieldElement.MaxValue) {
+                    return new Date(props.fieldElement.MaxValue);
                 }
                 return undefined;
             })
 
             watch(
-                () => props.modelValue,
+                () => props.fieldElement.Value,
                 (newValue) => {
                     localValue.value = newValue;
                 }
