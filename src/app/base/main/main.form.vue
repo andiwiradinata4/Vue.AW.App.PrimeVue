@@ -14,8 +14,17 @@
     <div class="mb-2"></div>
     <awSingleSelect :fieldElement="SingleSelectElement" />
     <div class="mb-2"></div>
+
+    <div>
+        <awDataTable :fieldElement="DataTableElement"></awDataTable>
+    </div>
+    <div class="mb-2"></div>
+
+
     <awButton :fieldElement="ButtonElement" @click="load" />
     <div class="mb-2"></div>
+
+
 
     <Button type="button" class="mt-2" severity="primary" label="Search" icon="pi pi-search" :loading="loading"
         @click="load" />
@@ -32,9 +41,11 @@
     import awInputPassword from '../components/awInputPassword.vue';
     import awSingleSelect from '../components/awSingleSelect.vue';
     import awTextArea from '../components/awTextArea.vue';
+    import awDataTable from '../components/awDataTable.vue';
     import awButton from '../components/awButton.vue';
     import Button from 'primevue/button';
     import { FieldElementItem } from '../models/fieldelementitem';
+    import AwDataTable from '../components/awDataTable.vue';
 
     export default defineComponent({
         name: 'MainLayout',
@@ -48,6 +59,7 @@
             awInputPassword,
             awSingleSelect,
             awTextArea,
+            awDataTable,
             awButton,
             Button
         },
@@ -124,6 +136,33 @@
                 PlaceHolder: 'TextAreaElement'
             }));
 
+            const DataTableElement = ref<FieldElementItem>(new FieldElementItem({
+                Name: 'DataTableElement',
+                ShowLabel: true,
+                Label: 'DataTable',
+                Required: true,
+                Disabled: false,
+                PlaceHolder: 'DataTableElement',
+                RowPerPageOptions: [5, 10, 20, 50, 100],
+                Fields: [
+                    new FieldElementItem({
+                        Name: 'Id',
+                        Label: 'Id',
+                        Visible: true
+                    }),
+                    new FieldElementItem({
+                        Name: 'Name',
+                        Label: 'Name',
+                        Visible: true
+                    }),
+                    new FieldElementItem({
+                        Name: 'Category',
+                        Label: 'Category',
+                        Visible: true
+                    })
+                ]
+            }));
+
             const ButtonElement = ref<FieldElementItem>(new FieldElementItem({
                 Name: 'ButtonElement',
                 Label: 'Button',
@@ -144,6 +183,7 @@
                 PasswordElement.value.Loading = loading.value;
                 TextAreaElement.value.Loading = loading.value;
                 SingleSelectElement.value.Loading = loading.value;
+                DataTableElement.value.Loading = loading.value;
                 ButtonElement.value.Loading = loading.value;
                 setTimeout(() => {
                     loading.value = false;
@@ -154,11 +194,12 @@
                     PasswordElement.value.Loading = loading.value;
                     TextAreaElement.value.Loading = loading.value;
                     SingleSelectElement.value.Loading = loading.value;
+                    DataTableElement.value.Loading = loading.value;
                     ButtonElement.value.Loading = loading.value;
                 }, 2000);
                 console.log(PasswordElement);
             };
-            return { loading, load, dateElement, numberElement, TextElement, MultiSelectElement, PasswordElement, SingleSelectElement, TextAreaElement, ButtonElement }
+            return { loading, load, dateElement, numberElement, TextElement, MultiSelectElement, PasswordElement, SingleSelectElement, TextAreaElement, ButtonElement, DataTableElement }
         },
     });
 </script>

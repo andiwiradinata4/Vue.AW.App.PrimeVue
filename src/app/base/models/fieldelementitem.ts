@@ -38,6 +38,7 @@ export interface FieldElementItem {
     Variant: any;
     IconPosition: any;
     Raised: boolean;
+    RowPerPageOptions: Array<number>;
 
     CharacterCasing: string;
     InputClass: string;
@@ -97,6 +98,7 @@ export class FieldElementItem extends BaseModel {
     Variant: any;
     IconPosition: any;
     Raised: boolean;
+    RowPerPageOptions: Array<number>;
 
     CharacterCasing: string;
     InputClass: string;
@@ -155,6 +157,7 @@ export class FieldElementItem extends BaseModel {
         this.Variant = data.Variant || undefined;
         this.IconPosition = data.IconPosition || undefined;
         this.Raised = data.Raised || false;
+        this.RowPerPageOptions = data.RowPerPageOptions || [5, 10, 20, 50];
 
         this.CharacterCasing = data.CharacterCasing || 'normal';
         this.InputClass = data.InputClass || '';
