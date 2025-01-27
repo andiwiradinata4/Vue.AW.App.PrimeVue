@@ -46,6 +46,7 @@
     import Button from 'primevue/button';
     import { FieldElementItem } from '../models/fieldelementitem';
     import AwDataTable from '../components/awDataTable.vue';
+    import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
     export default defineComponent({
         name: 'MainLayout',
@@ -148,17 +149,32 @@
                     new FieldElementItem({
                         Name: 'Id',
                         Label: 'Id',
-                        Visible: true
+                        Visible: true,
+                        Type: 'number'
                     }),
                     new FieldElementItem({
                         Name: 'Name',
                         Label: 'Name',
-                        Visible: true
+                        Visible: true,
+                        Type: 'text'
                     }),
                     new FieldElementItem({
                         Name: 'Category',
                         Label: 'Category',
-                        Visible: true
+                        Visible: true,
+                        Type: 'text'
+                    }),
+                    new FieldElementItem({
+                        Name: 'CreatedDate',
+                        Label: 'Created Date',
+                        Visible: true,
+                        Type: 'datetime'
+                    }),
+                    new FieldElementItem({
+                        Name: 'IsDeleted',
+                        Label: 'Deleted ?',
+                        Visible: true,
+                        Type: 'boolean'
                     })
                 ]
             }));
@@ -173,6 +189,8 @@
                 IconPosition: 'right',
                 Raised: true
             }));
+
+
 
             const load = () => {
                 loading.value = true;

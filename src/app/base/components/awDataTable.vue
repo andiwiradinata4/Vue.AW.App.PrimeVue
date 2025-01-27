@@ -1,33 +1,55 @@
 <template>
-    <DataTable :value="data" :loading="fieldElement.Loading" sortMode="multiple" removableSort paginator
+    <DataTable :value="data" ref="dt" :loading="fieldElement.Loading" sortMode="multiple" removableSort paginator
         :rows="fieldElement.RowPerPageOptions[0]" :rowsPerPageOptions="fieldElement.RowPerPageOptions"
-        tableStyle="min-width: 50rem">
+        v-model:filters="filters" filterDisplay="row" selectionMode="single" resizableColumns columnResizeMode="fit"
+        showGridlines @rowSelect="onRowSelect" :multiSortMeta="multiSortMeta" @sort="onSort"
+        tableStyle="min-width: 50rem" scrollable scrollHeight="800px">
         <template v-if="fieldElement.ShowLabel" #header>
-            <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 <span class="text-xl font-bold">{{ fieldElement.Label }}</span>
+                <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined @click="clearFilter()" />
+                <Button icon="pi pi-external-link" label="Export" @click="exportCSV($event)" />
             </div>
         </template>
-        <Column v-for="col of fieldElement.Fields" :key="col.Name" :field="col.Name" :header="col.Label" sortable>
+        <template #loading> Loading ... Please wait ... </template>
+        <Column v-for="col of fieldElement.Fields" :key="col.Name" :field="col.Name" :header="col.Label"
+            :dataType="columnType(col.Type)" sortable>
+            <template #body="{ data }">
+                <i v-if="col.Type.toLowerCase() === 'boolean'" class="pi"
+                    :class="{ 'pi-check-circle text-green-500 ': data[col.Name], 'pi-times-circle text-red-500': !data[col.Name] }"></i>
+                <span v-else>{{ data[col.Name] }}</span>
+            </template>
+            <template #filter="{ filterModel, filterCallback }">
+                <component :is="componentFilters(col)" v-model="filterModel.value" :inputId="col.Name"
+                    @input="onfilterCallback(col, filterModel, filterCallback)"
+                    @update:modelValue="onfilterCallback(col, filterModel, filterCallback)"
+                    :placeholder=placeholder(col.Label) :indeterminate="filterModel.value === null"
+                    :binary="col.Type.toLowerCase() === 'boolean'" fluid />
+            </template>
         </Column>
     </DataTable>
 </template>
 
 <script lang="ts">
-    import { ref, defineComponent, computed } from 'vue';
+    import { ref, defineComponent, computed, onMounted, watch, shallowRef } from 'vue';
     import { FieldElementItem } from '../models/fieldelementitem';
     import Skeleton from 'primevue/skeleton';
     import awButton from '../components/awButton.vue';
     import DataTable from 'primevue/datatable';
-    import Column from 'primevue/column';
-    import ColumnGroup from 'primevue/columngroup';   // optional
-    import Row from 'primevue/row';                   // optional
-    import { FilterMatchMode } from '@primevue/core/api';
+    import Column, { type ColumnFilterModelType } from 'primevue/column';
+    import ColumnGroup from 'primevue/columngroup';
+    import Row from 'primevue/row';
+    import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
 
-    // import { ProductService } from '@/service/ProductService';
+    import InputText from 'primevue/inputtext';
+    import InputNumber from 'primevue/inputnumber';
+    import DatePicker from 'primevue/datepicker';
+    import Button from 'primevue/button';
+    import Checkbox from 'primevue/checkbox';
 
     export default defineComponent({
         name: 'awDataTable',
-        components: { DataTable, awButton, Column, ColumnGroup, Row, Skeleton },
+        components: { DataTable, awButton, Column, ColumnGroup, Row, Skeleton, InputText, DatePicker, Button },
         props: {
             fieldElement: {
                 type: FieldElementItem,
@@ -36,121 +58,103 @@
         },
 
         setup(props, { emit }: any) {
-            const data = ref([
-                {
-                    'Id': 1,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 2,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 3,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 4,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 5,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 6,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 7,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 8,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 9,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 10,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 11,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 12,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 13,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 14,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 15,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 16,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 17,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
-                {
-                    'Id': 18,
-                    'Name': 'Andi',
-                    'Category': 'Personal'
-                },
+            const dt = ref();
+            const data = ref<any[]>([]);
+            const multiSortMeta = ref<any[]>([]);
 
-            ]);
+            const generateFilters = () => {
+                let f: any = {};
+                props.fieldElement.Fields.forEach(e => {
+                    if (e.Type.toLowerCase() === 'datetime') {
+                        f[e.Name] = { value: null, matchMode: FilterMatchMode.DATE_IS };
+                    } else if (e.Type.toLowerCase() === 'number') {
+                        f[e.Name] = { value: null, matchMode: FilterMatchMode.EQUALS };
+                    } else if (e.Type.toLowerCase() === 'boolean') {
+                        f[e.Name] = { value: null, matchMode: FilterMatchMode.EQUALS };
+                    } else {
+                        f[e.Name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH };
+                    }
+                });
+                return f;
+            }
 
-            // const filters = ref({});
+            const filters = shallowRef(generateFilters());
 
-            const computedFilters = computed(() => {
-                let filters: any = {};
-                if (props.fieldElement) {
-                    props.fieldElement.Fields.forEach(e => {
-                        if (e.Type.toLowerCase() === 'datetime') {
-                            filters[e.Name] = { value: null, matchMode: FilterMatchMode.BETWEEN };
+            const initFilters = () => {
+                filters.value = generateFilters();
+            }
 
-                        } else {
-                            filters[e.Name] = { value: null, matchMode: FilterMatchMode.CONTAINS };
-                        }
+            const clearFilter = () => {
+                initFilters();
+            };
 
-                    })
-
+            onMounted(() => {
+                for (let i = 1; i < 1000; i++) {
+                    data.value.push(
+                        {
+                            'Id': i,
+                            'Name': 'Andi ' + i,
+                            'Category': 'Personal ' + i,
+                            'CreatedDate': new Date(2024 + i, 1, 1),
+                            'IsDeleted': i % 2 === 0 ? false : true
+                        });
                 }
+            });
 
-            })
+            const componentFilters = (field: FieldElementItem) => {
+                if (field.Type.toLowerCase() === 'text') {
+                    return InputText;
+                } else if (field.Type.toLowerCase() === 'number') {
+                    return InputNumber;
+                } else if (field.Type.toLowerCase() === 'datetime') {
+                    return DatePicker;
+                } else if (field.Type.toLowerCase() === 'boolean') {
+                    return Checkbox;
+                }
+                return InputText;
+            }
 
+            const onfilterCallback = (field: FieldElementItem, filterModel: ColumnFilterModelType, filterCallback: () => void) => {
+                filterCallback();
+                console.log(field.Name, filterModel);
+            }
 
-            return { data, computedFilters };
+            const onRowSelect = (event: any) => {
+                console.log(event.data);
+            };
+
+            const placeholder = (label: string) => {
+                return `Search by ${label}`;
+            }
+
+            const onSort = async (event: any) => {
+                multiSortMeta.value = event.multiSortMeta;
+                multiSortMeta.value.forEach(e => {
+                    console.log('multiSortMeta-Item', e);
+                    console.log('multiSortMeta-Item-field', e.field);
+                    console.log('multiSortMeta-Item-sort', e.order === 1 ? 'ASC' : 'DESC');
+                });
+            };
+
+            const columnType = (type: string) => {
+                if (type.toLowerCase() === 'datetime') return 'date';
+                if (type.toLowerCase() === 'number') return 'numeric';
+                if (type.toLowerCase() === 'boolean') return type.toLowerCase();
+                return 'text'
+            }
+
+            watch(filters, (newValue) => {
+                console.log('filters', newValue);
+                Object.keys(filters.value).forEach((e: any) => {
+                    console.log(e, filters.value[e], filters.value[e]['value']);
+                })
+            });
+
+            const exportCSV = ($event: MouseEvent) => {
+                console.log($event);
+                dt.value.exportCSV();
+            };
+            return { dt, data, filters, onfilterCallback, onRowSelect, componentFilters, placeholder, multiSortMeta, onSort, columnType, clearFilter, exportCSV };
         },
     });
 
