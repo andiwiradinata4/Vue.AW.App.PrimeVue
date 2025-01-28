@@ -1,17 +1,17 @@
 // import './assets/main.css'
 import './assets/tailwind.css';
 import 'primeicons/primeicons.css';
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
 import { definePreset } from '@primevue/themes';
 import Aura from '@primevue/themes/aura';
+import 'primeicons/primeicons.css';
+import Ripple from 'primevue/ripple';
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 import App from './App.vue'
 import router from '@/app/router/index.ts'
 import { useAuthStore } from '@/app/stores/auth.store.ts';
 import '@/app/services/axios.service.ts';
-import 'primeicons/primeicons.css';
-import Ripple from 'primevue/ripple';
 
 const app = createApp(App);
 const Noir = definePreset(Aura, {
@@ -50,7 +50,21 @@ const Noir = definePreset(Aura, {
                     color: '{sky.600}',
                     inverseColor: '#ffffff',
                     hoverColor: '{sky.500}',
-                    activeColor: '{sky.400}'
+                    activeColor: '{sky.400}',
+                },
+                surface: {
+                    0: '#ffffff',
+                    50: '{zinc.50}',
+                    100: '{zinc.100}',
+                    200: '{zinc.200}',
+                    300: '{zinc.300}',
+                    400: '{zinc.400}',
+                    500: '{zinc.500}',
+                    600: '{zinc.600}',
+                    700: '{zinc.700}',
+                    800: '{zinc.800}',
+                    900: '{zinc.900}',
+                    950: '{zinc.950}'
                 },
                 highlight: {
                     background: '{zinc.950}',
@@ -67,7 +81,21 @@ const Noir = definePreset(Aura, {
                     color: '{zinc.50}',
                     inverseColor: '{zinc.950}',
                     hoverColor: '{zinc.100}',
-                    activeColor: '{zinc.200}'
+                    activeColor: '{zinc.200}',
+                },
+                surface: {
+                    0: '#ffffff',
+                    50: '{zinc.50}',
+                    100: '{zinc.100}',
+                    200: '{zinc.200}',
+                    300: '{zinc.300}',
+                    400: '{zinc.400}',
+                    500: '{zinc.500}',
+                    600: '{zinc.600}',
+                    700: '{zinc.700}',
+                    800: '{zinc.800}',
+                    900: '{zinc.900}',
+                    950: '{zinc.950}'
                 },
                 highlight: {
                     background: 'rgba(250, 250, 250, .16)',
@@ -88,7 +116,139 @@ const Noir = definePreset(Aura, {
         }
     },
     components: {
+        datatable: {
+            colorScheme: {
+                light: {
+                    root: {
+                        color: '{primary.color}',
+                        header: {
+                            cell:
+                            {
+                                selected: {
+                                    background: '{primary.color}'
+                                }
+                            }
+                        },
+                        filter: {
+                            constraint: {
+                                selected:
+                                {
+                                    background: '{primary.color}'
+                                }
+                            }
+                        }
+                    }
+                },
+                dark: {
+                    root: {
+                        color: '{zinc.100}',
+                        header: {
+                            cell:
+                            {
+                                selected: {
+                                    background: '{zinc.700}'
+                                }
+                            }
+                        },
+                        filter: {
+                            constraint: {
+                                selected:
+                                {
+                                    background: '{zinc.700}'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        paginator: {
+            colorScheme: {
+                light: {
+                    root: {
+                        color: '{primay.color}',
+                        nav: {
+                            button: {
+                                selected:
+                                {
+                                    background: '{primary.color}'
+                                }
+                            }
+                        }
+                    }
+                },
+                dark: {
+                    root: {
+                        color: '{zinc.100}',
+                        nav: {
+                            button: {
+                                selected:
+                                {
+                                    background: '{zinc.700}'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
+        },
+        select: {
+            colorScheme: {
+                light: {
+                    root: {
+                        color: '{primay.color}',
+                        overlay: {
+                            color: '{primary.color}',
+                        },
+                        option: {
+                            focus: {
+                                background: '{sky.100}'
+                            },
+                            selected: {
+                                background: '{primary.color}',
+                            }
+                        }
+                    }
+                },
+                dark: {
+                    root: {
+                        color: '{zinc.100}',
+                        overlay: {
+                            color: '{zinc.700}'
+                        },
+                        option: {
+                            focus: {
+                                background: '{zinc.700}'
+                            },
+                            selected: {
+                                background: '{zinc.600}',
+                            }
+                        }
+                    }
+                }
+            },
+        },
+        badge: {
+            colorScheme: {
+                light: {
+                    root: {
+                        color: '{primay.color}',
+                        primary: {
+                            background: '{sky.700}',
+                        }
+                    }
+                },
+                dark: {
+                    root: {
+                        color: '{zinc.100}',
+                        primary: {
+                            background: '{zinc.100}',
+                        }
+                    }
+                }
+            },
+        }
     }
 });
 
