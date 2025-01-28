@@ -6,7 +6,7 @@
                 ex ea commodo consequat.</p>
         </Drawer>
         <Button icon="pi pi-bars" @click="visible = true" />
-        <h1 class="ml-2 font-semibold text-xl">ERPS</h1>
+        <h1 class="ml-4 font-semibold text-xl">ERPS</h1>
     </div>
 </template>
 
@@ -22,7 +22,7 @@ const visible = ref(false);
     display: flex;
     align-items: center;
     padding: 1rem;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    /* background-color: #f8f9fa; */
+    /* border-bottom: 1px solid #dee2e6; */
 }
 </style>

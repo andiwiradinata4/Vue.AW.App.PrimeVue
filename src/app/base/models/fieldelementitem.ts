@@ -39,6 +39,7 @@ export interface FieldElementItem {
     IconPosition: any;
     Raised: boolean;
     RowPerPageOptions: Array<number>;
+    ScrollHeight: any;
 
     CharacterCasing: string;
     InputClass: string;
@@ -99,6 +100,7 @@ export class FieldElementItem extends BaseModel {
     IconPosition: any;
     Raised: boolean;
     RowPerPageOptions: Array<number>;
+    ScrollHeight: any;
 
     CharacterCasing: string;
     InputClass: string;
@@ -158,6 +160,7 @@ export class FieldElementItem extends BaseModel {
         this.IconPosition = data.IconPosition || undefined;
         this.Raised = data.Raised || false;
         this.RowPerPageOptions = data.RowPerPageOptions || [5, 10, 20, 50];
+        this.ScrollHeight = data.ScrollHeight || '480px';
 
         this.CharacterCasing = data.CharacterCasing || 'normal';
         this.InputClass = data.InputClass || '';
