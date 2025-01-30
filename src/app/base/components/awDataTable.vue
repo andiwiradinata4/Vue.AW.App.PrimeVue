@@ -103,6 +103,7 @@
 
             const initFilters = () => {
                 filters.value = generateFilters();
+                console.log(filters.value);
             }
 
             const clearFilter = () => {

@@ -1,12 +1,13 @@
 import { defineStore } from "pinia";
 import { GetFieldElement, GetFieldElementByCode, AppGet, AppPost, AppPut, AppDelete } from '@/app/services/app.service';
-import { useRouter } from 'vue-router';
 import { FieldElement } from "@/app/base/models/fieldelement";
 import { Message, type MessageObject } from "@/app/base/models/messageobject";
 import { DataColumn } from '@/app/base/models/datacolumn';
 import { PageDTO } from "@/app/base/DTOs/page.dto";
 import type { AxiosError } from "axios";
 import { useLoadingStore } from '@/app/stores/loading.store';
+import { useZodStore } from "./zod.store";
+import { z } from 'zod';
 
 export const useAppStore = defineStore('appstore', {
     state: () => ({
@@ -33,7 +34,7 @@ export const useAppStore = defineStore('appstore', {
         afterPageInitialise: null as Function | null,
         beforeLoadData: null as Function | null,
         afterLoadData: null as Function | null,
-        pageFilter: null as any | { [Key: string]: any },
+        pageFilter: null as any | { [Key: string]: any }
     }),
     actions: {
         init(baseUrl: string, url: string, fieldElementCode: string, routeNameHeader?: string, routeNameDetail?: string, referencesId?: string, pageFilter?: { [Key: string]: any }) {
@@ -48,14 +49,6 @@ export const useAppStore = defineStore('appstore', {
             } else {
                 this.pageFilter = { 'Page': 1, 'PageSize': 10 };
             }
-
-            // console.log('this.baseUrl', this.baseUrl);
-            // console.log('this.url', this.url);
-            // console.log('this.fieldElementCode', this.fieldElementCode);
-            // console.log('this.routeNameHeader', this.routeNameHeader);
-            // console.log('this.routeNameDetail', this.routeNameDetail);
-            // console.log('this.referencesId', this.referencesId);
-            // console.log('this.pageFilter', this.pageFilter);
         },
 
         setBaseUrl(baseUrl: string) {
@@ -103,10 +96,20 @@ export const useAppStore = defineStore('appstore', {
             }
         },
         async getFieldElementByCode(code: string) {
+            const zodStore = useZodStore();
             try {
                 this.loading = true;
                 const response = await GetFieldElementByCode(code);
                 this.fieldElement = new FieldElement(response.data);
+                let schema: Record<string, any> = {};
+                this.fieldElement.Fields.forEach(e => {
+                    if (e.Required && (e.Type.toLowerCase() === 'text' || e.Type.toLowerCase() === 'password' || e.Type.toLowerCase() === 'textarea')) schema[e.Name] = z.string().min(1, 'This field is required');
+                    if (e.Type.toLowerCase() === 'email') schema[e.Name] = z.string().email('Invalid email address');
+                    if (e.Required && e.MinValue && e.Type.toLowerCase() === 'number') schema[e.Name] = z.number().min(e.MinValue, `This field must more than ${e.MinValue}`);
+                    if (e.Required && e.MaxValue && e.Type.toLowerCase() === 'number') schema[e.Name] = z.number().max(e.MaxValue, `This field must less than ${e.MaxValue}`);
+                    if (e.Required && e.Type.toLowerCase() === 'datetime') schema[e.Name] = z.date({ required_error: 'This field is required' });
+                })
+                if (Object.keys(schema).length > 0) zodStore.setSchema(schema);
             } catch (e) {
                 if ((e as AxiosError).response) {
                     this.errorMessages = ((e as AxiosError)?.response?.data as MessageObject).Errors;

@@ -46,8 +46,6 @@
     import Button from 'primevue/button';
     import { FieldElementItem } from '../models/fieldelementitem';
     import AwDataTable from '../components/awDataTable.vue';
-    import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-
     export default defineComponent({
         name: 'MainLayout',
         components: {
