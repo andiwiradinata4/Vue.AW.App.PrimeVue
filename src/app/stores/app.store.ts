@@ -103,10 +103,14 @@ export const useAppStore = defineStore('appstore', {
                 this.fieldElement = new FieldElement(response.data);
                 let schema: Record<string, any> = {};
                 this.fieldElement.Fields.forEach(e => {
+                    // String
                     if (e.Required && (e.Type.toLowerCase() === 'text' || e.Type.toLowerCase() === 'password' || e.Type.toLowerCase() === 'textarea')) schema[e.Name] = z.string().min(1, 'This field is required');
                     if (e.Type.toLowerCase() === 'email') schema[e.Name] = z.string().email('Invalid email address');
-                    if (e.Required && e.MinValue && e.Type.toLowerCase() === 'number') schema[e.Name] = z.number().min(e.MinValue, `This field must more than ${e.MinValue}`);
-                    if (e.Required && e.MaxValue && e.Type.toLowerCase() === 'number') schema[e.Name] = z.number().max(e.MaxValue, `This field must less than ${e.MaxValue}`);
+                    if (e.Required && e.MinValue && (e.Type.toLowerCase() === 'text' || e.Type.toLowerCase() === 'textarea' || e.Type.toLowerCase() === 'password')) schema[e.Name] = z.string().min(e.MinValue, `This field must be at least ${e.MinValue} characters long.`);
+                    if (e.Required && e.MaxValue && (e.Type.toLowerCase() === 'text' || e.Type.toLowerCase() === 'textarea' || e.Type.toLowerCase() === 'password')) schema[e.Name] = z.string().max(e.MaxValue, `This field must not exceed ${e.MaxValue} characters.`);
+
+                    if (e.Required && e.MinValue && e.Type.toLowerCase() === 'number') schema[e.Name] = z.number().gt(e.MinValue, `This field must more than ${e.MinValue}`);
+                    if (e.Required && e.MaxValue && e.Type.toLowerCase() === 'number') schema[e.Name] = z.number().lt(e.MaxValue, `This field must less than ${e.MaxValue}`);
                     if (e.Required && e.Type.toLowerCase() === 'datetime') schema[e.Name] = z.date({ required_error: 'This field is required' });
                 })
                 if (Object.keys(schema).length > 0) zodStore.setSchema(schema);
