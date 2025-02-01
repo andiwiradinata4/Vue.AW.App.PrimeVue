@@ -1,15 +1,19 @@
 import { defineStore } from "pinia";
-import { z } from 'zod';
-
-type DynamicState = Record<string, any>;
 export const useZodStore = defineStore('zodStore', {
     state: () => ({
         schema: null as Record<string, any> | null
     }),
     actions: {
         setSchema(schema: Record<string, any>) {
-            this.schema = schema;
-            this.schema[''] = {}
+            this.schema = {};
+            this.mergeSchema(schema);
+        },
+        mergeSchema(schema: Record<string, any>) {
+            Object.keys(schema).forEach(e => {
+                if (this.schema) {
+                    this.schema[e] = schema[e];
+                }
+            })
         }
     }
 })

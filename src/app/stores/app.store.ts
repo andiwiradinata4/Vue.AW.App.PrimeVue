@@ -101,7 +101,7 @@ export const useAppStore = defineStore('appstore', {
                 this.loading = true;
                 const response = await GetFieldElementByCode(code);
                 this.fieldElement = new FieldElement(response.data);
-                let schema: Record<string, any> = {};
+                let schema: Record<string, any> = z.object({});
                 this.fieldElement.Fields.forEach(e => {
                     // String
                     if (e.Required && (e.Type.toLowerCase() === 'text' || e.Type.toLowerCase() === 'password' || e.Type.toLowerCase() === 'textarea')) schema[e.Name] = z.string().min(1, 'This field is required');

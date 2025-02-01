@@ -2,16 +2,6 @@
     <div class="card flex justify-center">
         <Toast /> <!-- Make sure you register this component globally -->
 
-        <Form v-slot="$form" :initialValues="initialValues" :resolver="resolver" @submit="onFormSubmit"
-            class="flex flex-col gap-4 w-full sm:w-56">
-            <div class="flex flex-col gap-1">
-                <InputText name="username" type="text" placeholder="Username" fluid />
-                <Message v-if="$form.username?.invalid" severity="error" size="small" variant="simple">
-                    {{ $form.username?.error?.message }}
-                </Message>
-            </div>
-            <Button type="submit" severity="secondary" label="Submit" />
-        </Form>
     </div>
 </template>
 
@@ -19,18 +9,16 @@
     import { defineComponent, onMounted, reactive } from 'vue';
     import { useToast } from 'primevue/usetoast';
     import Toast from 'primevue/toast'; // Import this component
-    import Form from '@primevue/forms';  // Ensure correct import for Form component
-    import { useZodStore } from '@/app/stores/zod.store';
+    import awDataTable from '@/app/base/components/awDataTable.vue';
+    import { useAppStore } from '@/app/stores/app.store';
 
     export default defineComponent({
-        name: 'awFormGroup',
-        components: { Toast, Form },
-        props: {
-
-        },
+        name: 'awFormListGroup',
+        components: { Toast, awDataTable },
+        props: {},
         setup() {
             const toast = useToast();
-            const zodStore = useZodStore();
+            const appStore = useAppStore();
 
             const initialValues = reactive({
                 username: ''

@@ -8,6 +8,8 @@
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <span class="text-xl font-bold mr-2">{{ fieldElement.Label }}</span>
                 <span>
+                    <!-- <Button v-for="btn in fieldElement.Fields.filter(e => e.Type.toLowerCase() === 'button')"
+                        type="button" icon=""></Button> -->
                     <Button type="button" icon="pi pi-filter-slash" class="mr-2 mb-2" label="Clear" outlined
                         @click="clearFilter()" />
                     <Button icon="pi pi-external-link" label="Export" class="mr-2 mb-2" outlined
@@ -37,9 +39,8 @@
             </template>
         </Column>
         <template #paginatorcontainer>
-            <Paginator :rows="fieldElement.RowPerPageOptions[0]" :totalRecords="data.length"
-                :rowsPerPageOptions="fieldElement.RowPerPageOptions" @update:first="updatePagination"
-                @update:rows="updatePagination" @page="pageHandle">
+            <Paginator :rows="fieldElement.RowPerPageOptions[0]" :totalRecords="totalCount"
+                :rowsPerPageOptions="fieldElement.RowPerPageOptions" @page="pageHandle">
                 <template #start="slotProps">
                     Page: {{ slotProps.state.page }}
                     First: {{ slotProps.state.first }}
@@ -82,6 +83,7 @@
             const dt = ref();
             const data = ref<any[]>([]);
             const multiSortMeta = ref<any[]>([]);
+            const totalCount = ref(0);
 
             const generateFilters = () => {
                 let f: any = {};
@@ -121,6 +123,11 @@
                             'IsDeleted': i % 2 === 0 ? false : true
                         });
                 }
+
+                //// Get Data
+                //// Total Count get from Backend
+
+                totalCount.value = data.value.length;
             });
 
             const componentFilters = (field: FieldElementItem) => {
@@ -173,7 +180,7 @@
             });
 
             const exportCSV = ($event: MouseEvent) => {
-                console.log($event);
+                console.log(dt.value);
                 dt.value.exportCSV();
             };
 
@@ -185,7 +192,7 @@
                 console.log('pageHandle', event);
             }
 
-            return { data, filters, onRowSelect, multiSortMeta, onSort, clearFilter, exportCSV, columnType, componentFilters, onfilterCallback, placeholder, updatePagination, pageHandle }
+            return { dt, data, filters, onRowSelect, multiSortMeta, onSort, clearFilter, exportCSV, columnType, componentFilters, onfilterCallback, placeholder, pageHandle, totalCount }
         },
     });
 

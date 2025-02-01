@@ -12,8 +12,11 @@ import App from './App.vue'
 import router from '@/app/router/index.ts'
 import { useAuthStore } from '@/app/stores/auth.store.ts';
 import '@/app/services/axios.service.ts';
+import ToastService from 'primevue/toastservice';
 
 const app = createApp(App);
+app.use(ToastService);
+
 const Noir = definePreset(Aura, {
     semantic: {
         primary: {
@@ -251,7 +254,6 @@ const Noir = definePreset(Aura, {
         }
     }
 });
-
 app.use(PrimeVue, {
     // Default theme configuration
     theme: {

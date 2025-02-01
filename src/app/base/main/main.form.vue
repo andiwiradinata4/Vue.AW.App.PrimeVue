@@ -1,5 +1,6 @@
 <template>
     <h1 class="mb-10">Display Component</h1>
+
     <awDatePicker :fieldElement="dateElement" />
     <div class="mb-2"></div>
     <awInputNumber :fieldElement="numberElement" />
@@ -14,18 +15,13 @@
     <div class="mb-2"></div>
     <awSingleSelect :fieldElement="SingleSelectElement" />
     <div class="mb-2"></div>
-
     <div>
         <awDataTable :fieldElement="DataTableElement"></awDataTable>
     </div>
     <div class="mb-2"></div>
 
-
     <awButton :fieldElement="ButtonElement" @click="load" />
     <div class="mb-2"></div>
-
-
-
     <Button type="button" class="mt-2" severity="primary" label="Search" icon="pi pi-search" :loading="loading"
         @click="load" />
 </template>
@@ -221,5 +217,23 @@
 </script>
 
 <style>
-/* Tambahkan gaya tambahan jika diperlukan */
+@keyframes slidedown-icon {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(20px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.slidedown-icon {
+    animation: slidedown-icon;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+}
 </style>

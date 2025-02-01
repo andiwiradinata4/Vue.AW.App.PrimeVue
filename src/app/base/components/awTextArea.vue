@@ -2,8 +2,8 @@
     <awLabel v-if="fieldElement.ShowLabel" :id="fieldElement.Name" :label="fieldElement.Label"
         :required="fieldElement.Required" :loading="fieldElement.Loading" />
     <Skeleton v-if="fieldElement.Loading" height="4rem" />
-    <TextArea v-else v-model="fieldElement.Value" :min="fieldElement.MinValue" :max="fieldElement.MaxValue"
-        :disabled="fieldElement.Disabled" :placeholder="fieldElement.PlaceHolder" autoResize fluid>
+    <TextArea v-else v-model="fieldElement.Value" :disabled="fieldElement.Disabled"
+        :placeholder="fieldElement.PlaceHolder" :autoResize="true" fluid>
     </TextArea>
 </template>
 
