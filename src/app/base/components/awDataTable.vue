@@ -32,10 +32,8 @@
             </template>
             <template #filter="{ filterModel, filterCallback }">
                 <component :is="componentFilters(col)" v-model="filterModel.value" :inputId="col.Name"
-                    @input="onfilterCallback(col, filterModel, filterCallback)"
-                    @update:modelValue="onfilterCallback(col, filterModel, filterCallback)"
-                    :placeholder=placeholder(col.Label) :indeterminate="filterModel.value === null"
-                    :binary="col.Type.toLowerCase() === 'boolean'" fluid />
+                    @input="onfilterCallback(col, filterModel, filterCallback)" :placeholder=placeholder(col.Label)
+                    :indeterminate="filterModel.value === null" :binary="col.Type.toLowerCase() === 'boolean'" fluid />
             </template>
         </Column>
         <template #paginatorcontainer>
@@ -54,9 +52,10 @@
 <script lang="ts">
     import { ref, defineComponent, onMounted, watch, shallowRef } from 'vue';
     import { FieldElementItem } from '../models/fieldelementitem';
+    import { FieldElement } from '../models/fieldelement';
     import Skeleton from 'primevue/skeleton';
     import awButton from '../components/awButton.vue';
-    import DataTable from 'primevue/datatable';
+    import DataTable, { type DataTableFilterMeta } from 'primevue/datatable';
     import Column, { type ColumnFilterModelType } from 'primevue/column';
     import ColumnGroup from 'primevue/columngroup';
     import Row from 'primevue/row';
@@ -69,21 +68,29 @@
     import Button from 'primevue/button';
     import Checkbox from 'primevue/checkbox';
 
+
     export default defineComponent({
         name: 'awDataTable',
         components: { DataTable, awButton, Column, ColumnGroup, Row, Skeleton, Paginator, InputText, DatePicker, Button },
         props: {
             fieldElement: {
-                type: FieldElementItem,
+                type: FieldElement,
                 required: true
+            },
+            pageFilter: {
+                type: Object,
+                default: {}
             }
         },
+
+        emits: ['update:pagefilter'],
 
         setup(props, { emit }: any) {
             const dt = ref();
             const data = ref<any[]>([]);
             const multiSortMeta = ref<any[]>([]);
             const totalCount = ref(0);
+            const pageFilterLocal = ref<any>({})
 
             const generateFilters = () => {
                 let f: any = {};
@@ -127,6 +134,14 @@
                 //// Get Data
                 //// Total Count get from Backend
 
+                if (Object.keys(props.pageFilter).length === 0) {
+                    pageFilterLocal.value['Page'] = 0;
+                    pageFilterLocal.value['PageSize'] = props.fieldElement.RowPerPageOptions[0];
+                }
+                else {
+                    pageFilterLocal.value = props.pageFilter;
+                }
+                console.log('pageFilter', pageFilterLocal.value);
                 totalCount.value = data.value.length;
             });
 
@@ -145,11 +160,10 @@
 
             const onfilterCallback = (field: FieldElementItem, filterModel: ColumnFilterModelType, filterCallback: () => void) => {
                 filterCallback();
-                console.log(field.Name, filterModel);
             }
 
             const onRowSelect = (event: any) => {
-                console.log(event.data);
+                console.log('onRowSelect -> Click ', event.data);
             };
 
             const placeholder = (label: string) => {
@@ -157,12 +171,20 @@
             }
 
             const onSort = async (event: any) => {
+                let sortParams: Array<any> = [];
+                pageFilterLocal.value['SortParams'] = null;
+
                 multiSortMeta.value = event.multiSortMeta;
                 multiSortMeta.value.forEach(e => {
-                    console.log('multiSortMeta-Item', e);
-                    console.log('multiSortMeta-Item-field', e.field);
-                    console.log('multiSortMeta-Item-sort', e.order === 1 ? 'ASC' : 'DESC');
+                    // console.log('multiSortMeta-Item', e);
+                    // console.log('multiSortMeta-Item-field', e.field);
+                    // console.log('multiSortMeta-Item-sort', e.order === 1 ? 'ASC' : 'DESC');
+                    sortParams.push({ 'Column': e.field, 'Option': e.order === 1 ? 'ASC' : 'DESC' })
                 });
+
+                pageFilterLocal.value['SortParams'] = sortParams;
+                // console.log('pageFilter', pageFilterLocal.value);
+                emit('update:pagefilter', pageFilterLocal.value);
             };
 
             const columnType = (type: string) => {
@@ -173,10 +195,17 @@
             }
 
             watch(filters, (newValue) => {
-                console.log('filters', newValue);
-                Object.keys(filters.value).forEach((e: any) => {
-                    console.log(e, filters.value[e], filters.value[e]['value']);
+                let filterParams: Array<any> = [];
+                pageFilterLocal.value['FilterParams'] = null;
+
+                Object.keys(newValue).forEach((e: any) => {
+                    if (newValue[e]['value']) {
+                        // console.log(e, filters.value[e], filters.value[e]['value']);
+                        filterParams.push({ 'Key': e, 'Option': newValue[e]['matchMode'], 'Value': newValue[e]['value'] })
+                    }
                 })
+                pageFilterLocal.value['FilterParams'] = filterParams;
+                emit('update:pagefilter', pageFilterLocal.value);
             });
 
             const exportCSV = ($event: MouseEvent) => {
@@ -189,7 +218,11 @@
             }
 
             const pageHandle = (event: PageState) => {
-                console.log('pageHandle', event);
+                // console.log('pageHandle', event);
+                pageFilterLocal.value['Page'] = event.page;
+                pageFilterLocal.value['PageSize'] = event.rows;
+                // console.log('pageFilter', pageFilterLocal.value);
+                emit('update:pagefilter', pageFilterLocal.value);
             }
 
             return { dt, data, filters, onRowSelect, multiSortMeta, onSort, clearFilter, exportCSV, columnType, componentFilters, onfilterCallback, placeholder, pageHandle, totalCount }

@@ -1,16 +1,18 @@
 <template>
     <div class="card flex justify-center">
-        <Toast /> <!-- Make sure you register this component globally -->
+        <Toast />
+        <awDataTable :fieldElement="appStore.fieldElement!" />
 
     </div>
 </template>
 
 <script lang="ts">
-    import { defineComponent, onMounted, reactive } from 'vue';
+    import { defineComponent, onBeforeMount, onMounted, reactive } from 'vue';
     import { useToast } from 'primevue/usetoast';
     import Toast from 'primevue/toast'; // Import this component
     import awDataTable from '@/app/base/components/awDataTable.vue';
     import { useAppStore } from '@/app/stores/app.store';
+    import AwDataTable from '@/app/base/components/awDataTable.vue';
 
     export default defineComponent({
         name: 'awFormListGroup',
@@ -24,7 +26,15 @@
                 username: ''
             });
 
-            onMounted(() => { });
+            onBeforeMount(() => {
+                appStore.init('', '', '', '', '', '');
+            })
+
+            onMounted(() => {
+                appStore.getFieldElementByCode('');
+                appStore.getDataPageDefault();
+
+            });
 
 
             const resolver = ({ values }: any) => {
@@ -52,7 +62,7 @@
             return {
                 initialValues,
                 resolver,
-                onFormSubmit
+                onFormSubmit, appStore
             };
         },
     });

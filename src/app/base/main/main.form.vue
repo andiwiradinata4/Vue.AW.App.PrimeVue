@@ -16,7 +16,8 @@
     <awSingleSelect :fieldElement="SingleSelectElement" />
     <div class="mb-2"></div>
     <div>
-        <awDataTable :fieldElement="DataTableElement"></awDataTable>
+        <awDataTable :fieldElement="DataTableElement" :pageFilter="pageFilter" @update:pagefilter="updatePageFilter">
+        </awDataTable>
     </div>
     <div class="mb-2"></div>
 
@@ -42,6 +43,7 @@
     import Button from 'primevue/button';
     import { FieldElementItem } from '../models/fieldelementitem';
     import AwDataTable from '../components/awDataTable.vue';
+    import { FieldElement } from '../models/fieldelement';
     export default defineComponent({
         name: 'MainLayout',
         components: {
@@ -60,6 +62,8 @@
         },
         setup() {
             const loading = ref(false);
+            const pageFilter = ref<any>({})
+
             const dateElement = ref<FieldElementItem>(new FieldElementItem({
                 Name: 'DateElement',
                 ShowLabel: false,
@@ -131,14 +135,11 @@
                 PlaceHolder: 'TextAreaElement'
             }));
 
-            const DataTableElement = ref<FieldElementItem>(new FieldElementItem({
+            const DataTableElement = ref<FieldElement>(new FieldElement({
                 Name: 'DataTableElement',
                 ShowLabel: true,
                 Label: 'DataTable',
-                Required: true,
                 Disabled: false,
-                PlaceHolder: 'DataTableElement',
-                RowPerPageOptions: [5, 10, 20, 50, 100],
                 Fields: [
                     new FieldElementItem({
                         Name: 'Id',
@@ -184,8 +185,6 @@
                 Raised: true
             }));
 
-
-
             const load = () => {
                 loading.value = true;
                 dateElement.value.Loading = loading.value;
@@ -211,7 +210,12 @@
                 }, 2000);
                 console.log(PasswordElement);
             };
-            return { loading, load, dateElement, numberElement, TextElement, MultiSelectElement, PasswordElement, SingleSelectElement, TextAreaElement, ButtonElement, DataTableElement }
+
+            const updatePageFilter = (value: any) => {
+                console.log('updatePageFilter -> main.form', value);
+            }
+
+            return { loading, load, dateElement, numberElement, TextElement, MultiSelectElement, PasswordElement, SingleSelectElement, TextAreaElement, ButtonElement, DataTableElement, pageFilter, updatePageFilter }
         },
     });
 </script>

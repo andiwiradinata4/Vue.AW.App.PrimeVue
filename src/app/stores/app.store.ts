@@ -172,22 +172,23 @@ export const useAppStore = defineStore('appstore', {
         },
 
         async getDataPageDefault() {
-            const loadingStore = useLoadingStore();
-            try {
-                loadingStore.startLoading();
-                const response = await AppPost(this.baseUrl, this.url + '/page', this.pageFilter);
-                this.dataPage = new PageDTO(response.data);
-                console.log(this.dataPage);
-            } catch (e) {
-                if ((e as AxiosError).response) {
-                    this.errorMessages = ((e as AxiosError)?.response?.data as MessageObject).Errors;
-                } else {
-                    this.errorMessages.push(new Message({ Description: (e as AxiosError).message }))
-                }
-                throw e;
-            } finally {
-                loadingStore.stopLoading();
-            }
+            this.getDataPage(this.baseUrl, this.url + '/page', this.pageFilter);
+            // const loadingStore = useLoadingStore();
+            // try {
+            //     loadingStore.startLoading();
+            //     const response = await AppPost(this.baseUrl, this.url + '/page', this.pageFilter);
+            //     this.dataPage = new PageDTO(response.data);
+            //     console.log(this.dataPage);
+            // } catch (e) {
+            //     if ((e as AxiosError).response) {
+            //         this.errorMessages = ((e as AxiosError)?.response?.data as MessageObject).Errors;
+            //     } else {
+            //         this.errorMessages.push(new Message({ Description: (e as AxiosError).message }))
+            //     }
+            //     throw e;
+            // } finally {
+            //     loadingStore.stopLoading();
+            // }
         },
 
         async getDataById(baseUrl: string, url: string, id: string) {
