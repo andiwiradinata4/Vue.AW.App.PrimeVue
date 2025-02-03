@@ -50,184 +50,206 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, onMounted, watch } from 'vue';
-import { FieldElementItem } from '@/app/base/models/fieldelementitem';
-import { FieldElement } from '@/app/base/models/fieldelement';
-import Skeleton from 'primevue/skeleton';
-import awButton from '@/app/base/components/awButton.vue';
-import DataTable, { type DataTableFilterMeta } from 'primevue/datatable';
-import Column, { type ColumnFilterModelType } from 'primevue/column';
-import ColumnGroup from 'primevue/columngroup';
-import Row from 'primevue/row';
-import { FilterMatchMode } from '@primevue/core/api';
+    import { ref, defineComponent, onMounted, watch } from 'vue';
+    import { FieldElementItem } from '@/app/base/models/fieldelementitem';
+    import { FieldElement } from '@/app/base/models/fieldelement';
+    import Skeleton from 'primevue/skeleton';
+    import awButton from '@/app/base/components/awButton.vue';
+    import DataTable, { type DataTableFilterMeta } from 'primevue/datatable';
+    import Column, { type ColumnFilterModelType } from 'primevue/column';
+    import ColumnGroup from 'primevue/columngroup';
+    import Row from 'primevue/row';
+    import { FilterMatchMode } from '@primevue/core/api';
 
-import Paginator, { type PageState } from 'primevue/paginator';
-import InputText from 'primevue/inputtext';
-import InputNumber from 'primevue/inputnumber';
-import DatePicker from 'primevue/datepicker';
-import Button from 'primevue/button';
-import Checkbox from 'primevue/checkbox';
+    import Paginator, { type PageState } from 'primevue/paginator';
+    import InputText from 'primevue/inputtext';
+    import InputNumber from 'primevue/inputnumber';
+    import DatePicker from 'primevue/datepicker';
+    import Button from 'primevue/button';
+    import Checkbox from 'primevue/checkbox';
+    import awDatePicker from '@/app/base/components/awDatePicker.vue';
+    import awInputNumber from '@/app/base/components/awInputNumber.vue';
+    import awInputText from '@/app/base/components/awInputText.vue';
+    import awCheckbox from '@/app/base/components/awCheckbox.vue';
+    import awInputNumberColumnFilter from '@/app/base/components/awInputNumberColumnFilter.vue';
 
-
-export default defineComponent({
-    name: 'awDataTable',
-    components: { DataTable, awButton, Column, ColumnGroup, Row, Skeleton, Paginator, InputText, DatePicker, Button },
-    props: {
-        fieldElement: {
-            type: FieldElement,
-            required: true
+    export default defineComponent({
+        name: 'awDataTable',
+        components: { DataTable, awButton, Column, ColumnGroup, Row, Skeleton, Paginator, InputText, DatePicker, Button, awDatePicker, awInputNumber, awInputText, awCheckbox, awInputNumberColumnFilter },
+        props: {
+            fieldElement: {
+                type: FieldElement,
+                required: true
+            },
+            pageFilter: {
+                type: Object,
+                default: {}
+            }
         },
-        pageFilter: {
-            type: Object,
-            default: {}
-        }
-    },
 
-    emits: ['update:pagefilter'],
+        emits: ['update:pagefilter'],
 
-    setup(props, { emit }: any) {
-        const dt = ref();
-        const data = ref<any[]>([]);
-        const multiSortMeta = ref<any[]>([]);
-        const totalCount = ref(0);
-        const pageFilterLocal = ref<any>({})
+        setup(props, { emit }: any) {
+            const dt = ref();
+            const data = ref<any[]>([]);
+            const multiSortMeta = ref<any[]>([]);
+            const totalCount = ref(0);
+            const pageFilterLocal = ref<any>({})
 
-        const generateFilters = () => {
-            let f: any = {};
-            props.fieldElement.Fields.forEach(e => {
-                if (e.Type.toLowerCase() === 'datetime') {
-                    f[e.Name] = { value: null, matchMode: FilterMatchMode.DATE_IS };
-                } else if (e.Type.toLowerCase() === 'number') {
-                    f[e.Name] = { value: null, matchMode: FilterMatchMode.EQUALS };
-                } else if (e.Type.toLowerCase() === 'boolean') {
-                    f[e.Name] = { value: null, matchMode: FilterMatchMode.EQUALS };
-                } else {
-                    f[e.Name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH };
+            const generateFilters = () => {
+                let f: any = {};
+                props.fieldElement.Fields.forEach(e => {
+                    if (e.Type.toLowerCase() === 'datetime') {
+                        f[e.Name] = { value: null, matchMode: FilterMatchMode.DATE_IS };
+                    } else if (e.Type.toLowerCase() === 'number') {
+                        f[e.Name] = { value: null, matchMode: FilterMatchMode.EQUALS };
+                    } else if (e.Type.toLowerCase() === 'boolean') {
+                        f[e.Name] = { value: null, matchMode: FilterMatchMode.EQUALS };
+                    } else {
+                        f[e.Name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH };
+                    }
+
+                    e.Value = undefined;
+                });
+                return f;
+            }
+
+            const filters = ref(generateFilters());
+
+            const initFilters = () => {
+                filters.value = generateFilters();
+                console.log(filters.value);
+            }
+
+            const clearFilter = () => {
+                initFilters();
+            };
+
+            onMounted(() => {
+                for (let i = 1; i < 1000; i++) {
+                    data.value.push(
+                        {
+                            'Id': i,
+                            'Name': 'Andi ' + i,
+                            'Category': 'Personal ' + i,
+                            'CreatedDate': new Date(2024 + i, 1, 1),
+                            'IsDeleted': i % 2 === 0 ? false : true
+                        });
                 }
-            });
-            return f;
-        }
 
-        const filters = ref(generateFilters());
+                //// Get Data
+                //// Total Count get from Backend
 
-        const initFilters = () => {
-            filters.value = generateFilters();
-            console.log(filters.value);
-        }
-
-        const clearFilter = () => {
-            initFilters();
-        };
-
-        onMounted(() => {
-            for (let i = 1; i < 1000; i++) {
-                data.value.push(
-                    {
-                        'Id': i,
-                        'Name': 'Andi ' + i,
-                        'Category': 'Personal ' + i,
-                        'CreatedDate': new Date(2024 + i, 1, 1),
-                        'IsDeleted': i % 2 === 0 ? false : true
-                    });
-            }
-
-            //// Get Data
-            //// Total Count get from Backend
-
-            if (Object.keys(props.pageFilter).length === 0) {
-                pageFilterLocal.value['Page'] = 0;
-                pageFilterLocal.value['PageSize'] = props.fieldElement.RowPerPageOptions[0];
-            }
-            else {
-                pageFilterLocal.value = props.pageFilter;
-            }
-            console.log('pageFilter', pageFilterLocal.value);
-            totalCount.value = data.value.length;
-        });
-
-        const componentFilters = (field: FieldElementItem) => {
-            if (field.Type.toLowerCase() === 'text') {
-                return InputText;
-            } else if (field.Type.toLowerCase() === 'number') {
-                return InputNumber;
-            } else if (field.Type.toLowerCase() === 'datetime') {
-                return DatePicker;
-            } else if (field.Type.toLowerCase() === 'boolean') {
-                return Checkbox;
-            }
-            return InputText;
-        }
-
-        const onfilterCallback = (field: FieldElementItem, filterModel: ColumnFilterModelType, filterCallback: () => void) => {
-            filterCallback();
-        }
-
-        const onRowSelect = (event: any) => {
-            console.log('onRowSelect -> Click ', event.data);
-        };
-
-        const placeholder = (label: string) => {
-            return `Search by ${label}`;
-        }
-
-        const onSort = async (event: any) => {
-            let sortParams: Array<any> = [];
-            pageFilterLocal.value['SortParams'] = null;
-
-            multiSortMeta.value = event.multiSortMeta;
-            multiSortMeta.value.forEach(e => {
-                // console.log('multiSortMeta-Item', e);
-                // console.log('multiSortMeta-Item-field', e.field);
-                // console.log('multiSortMeta-Item-sort', e.order === 1 ? 'ASC' : 'DESC');
-                sortParams.push({ 'Column': e.field, 'Option': e.order === 1 ? 'ASC' : 'DESC' })
+                if (Object.keys(props.pageFilter).length === 0) {
+                    pageFilterLocal.value['Page'] = 0;
+                    pageFilterLocal.value['PageSize'] = props.fieldElement.RowPerPageOptions[0];
+                }
+                else {
+                    pageFilterLocal.value = props.pageFilter;
+                }
+                console.log('pageFilter', pageFilterLocal.value);
+                totalCount.value = data.value.length;
             });
 
-            pageFilterLocal.value['SortParams'] = sortParams;
-            // console.log('pageFilter', pageFilterLocal.value);
-            emit('update:pagefilter', pageFilterLocal.value);
-        };
-
-        const columnType = (type: string) => {
-            if (type.toLowerCase() === 'datetime') return 'date';
-            if (type.toLowerCase() === 'number') return 'numeric';
-            if (type.toLowerCase() === 'boolean') return type.toLowerCase();
-            return 'text'
-        }
-
-        watch(filters, (newValue) => {
-            let filterParams: Array<any> = [];
-            pageFilterLocal.value['FilterParams'] = null;
-
-            Object.keys(newValue).forEach((e: any) => {
-                if (newValue[e]['value']) {
-                    // console.log(e, filters.value[e], filters.value[e]['value']);
-                    filterParams.push({ 'Key': e, 'Option': newValue[e]['matchMode'], 'Value': newValue[e]['value'] })
+            const componentFilters = (field: FieldElementItem) => {
+                if (field.Type.toLowerCase() === 'text') {
+                    return awInputText;
+                } else if (field.Type.toLowerCase() === 'number') {
+                    return awInputNumber;
+                } else if (field.Type.toLowerCase() === 'datetime') {
+                    return awDatePicker;
+                } else if (field.Type.toLowerCase() === 'boolean') {
+                    return awCheckbox;
                 }
-            })
-            pageFilterLocal.value['FilterParams'] = filterParams;
-            emit('update:pagefilter', pageFilterLocal.value);
-        });
+                return awInputText;
+            }
 
-        const exportCSV = ($event: MouseEvent) => {
-            console.log(dt.value);
-            dt.value.exportCSV();
-        };
+            const onfilterCallback = (field: FieldElementItem, filterModel: ColumnFilterModelType, filterCallback: () => void) => {
+                filterCallback();
+                // console.log('onfilterCallback.field', field);
+                // console.log('onfilterCallback.filterModel', filterModel);
+            }
 
-        const updatePagination = (value: number) => {
-            console.log('updatePagination', value);
-        }
+            const onRowSelect = (event: any) => {
+                console.log('onRowSelect -> Click ', event.data);
+            };
 
-        const pageHandle = (event: PageState) => {
-            // console.log('pageHandle', event);
-            pageFilterLocal.value['Page'] = event.page;
-            pageFilterLocal.value['PageSize'] = event.rows;
-            // console.log('pageFilter', pageFilterLocal.value);
-            emit('update:pagefilter', pageFilterLocal.value);
-        }
+            const placeholder = (label: string) => {
+                return `Search by ${label}`;
+            }
 
-        return { dt, data, filters, onRowSelect, multiSortMeta, onSort, clearFilter, exportCSV, columnType, componentFilters, onfilterCallback, placeholder, pageHandle, totalCount }
-    },
-});
+            const onSort = async (event: any) => {
+                let sortParams: Array<any> = [];
+                pageFilterLocal.value['SortParams'] = null;
+
+                multiSortMeta.value = event.multiSortMeta;
+                multiSortMeta.value.forEach(e => {
+                    // console.log('multiSortMeta-Item', e);
+                    // console.log('multiSortMeta-Item-field', e.field);
+                    // console.log('multiSortMeta-Item-sort', e.order === 1 ? 'ASC' : 'DESC');
+                    sortParams.push({ 'Column': e.field, 'Option': e.order === 1 ? 'ASC' : 'DESC' })
+                });
+
+                pageFilterLocal.value['SortParams'] = sortParams;
+                // console.log('pageFilter', pageFilterLocal.value);
+                emit('update:pagefilter', pageFilterLocal.value);
+            };
+
+            const columnType = (type: string) => {
+                if (type.toLowerCase() === 'datetime') return 'date';
+                if (type.toLowerCase() === 'number') return 'numeric';
+                if (type.toLowerCase() === 'boolean') return type.toLowerCase();
+                return 'text'
+            }
+
+            watch(filters, (newValue) => {
+                let filterParams: Array<any> = [];
+                pageFilterLocal.value['FilterParams'] = null;
+
+                Object.keys(newValue).forEach((e: any) => {
+                    if (newValue[e]['value']) {
+                        // console.log(e, filters.value[e], filters.value[e]['value']);
+                        filterParams.push({ 'Key': e, 'Option': newValue[e]['matchMode'], 'Value': newValue[e]['value'] })
+                    }
+                })
+                pageFilterLocal.value['FilterParams'] = filterParams;
+                emit('update:pagefilter', pageFilterLocal.value);
+            });
+
+            const exportCSV = ($event: MouseEvent) => {
+                console.log(dt.value);
+                dt.value.exportCSV();
+            };
+
+            const updatePagination = (value: number) => {
+                console.log('updatePagination', value);
+            }
+
+            const pageHandle = (event: PageState) => {
+                // console.log('pageHandle', event);
+                pageFilterLocal.value['Page'] = event.page;
+                pageFilterLocal.value['PageSize'] = event.rows;
+                // console.log('pageFilter', pageFilterLocal.value);
+                emit('update:pagefilter', pageFilterLocal.value);
+            }
+
+            const updateFieldHandle = (value: any, filterModel: ColumnFilterModelType, filterCallback: () => void) => {
+
+                filterCallback();
+                // filterModel.value = value.Value;
+                console.log('updateFieldHandle.value', value)
+                console.log('updateFieldHandle.filterModel', filterModel)
+            }
+
+            const clearFieldHandle = (value: any, filterModel: ColumnFilterModelType, filterCallback: () => void) => {
+                value.Value = undefined;
+                console.log('clearFieldHandle.value', value)
+                console.log('clearFieldHandle.filterModel', filterModel)
+                filterCallback();
+            }
+            return { dt, data, filters, onRowSelect, multiSortMeta, onSort, clearFilter, exportCSV, columnType, componentFilters, onfilterCallback, placeholder, pageHandle, totalCount, updateFieldHandle, clearFieldHandle }
+        },
+    });
 
 </script>
 
