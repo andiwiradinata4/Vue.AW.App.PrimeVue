@@ -7,40 +7,52 @@
             :prefix="fieldElement.Prefix" :suffix="fieldElement.Suffix"
             :minFractionDigits="fieldElement.MinFractionDigits" :maxFractionDigits="fieldElement.MaxFractionDigits"
             :mode="modeInput" :currency="fieldElement.Currency" :disabled="fieldElement.Disabled"
-            :locale="fieldElement.Locale" :placeholder="fieldElement.PlaceHolder" showButtons fluid>
+            :locale="fieldElement.Locale" :placeholder="fieldElement.PlaceHolder" @input="inputHandle" showButtons
+            fluid>
         </InputNumber>
     </div>
 </template>
 
 <script lang="ts">
-    import { defineComponent, computed } from 'vue';
-    import InputNumber from 'primevue/inputnumber';
-    import Skeleton from 'primevue/skeleton';
-    import awLabel from './awLabel.vue';
-    import { FieldElementItem } from '../models/fieldelementitem';
-    export default defineComponent({
-        name: 'awInputNumber',
-        components: { InputNumber, Skeleton, awLabel },
-        props: {
-            fieldElement: {
-                type: FieldElementItem,
-                required: true
+import { defineComponent, computed, watch } from 'vue';
+import InputNumber, { type InputNumberInputEvent } from 'primevue/inputnumber';
+import Skeleton from 'primevue/skeleton';
+import awLabel from './awLabel.vue';
+import { FieldElementItem } from '../models/fieldelementitem';
+export default defineComponent({
+    name: 'awInputNumber',
+    components: { InputNumber, Skeleton, awLabel },
+    props: {
+        fieldElement: {
+            type: FieldElementItem,
+            required: true
+        }
+    },
+
+    emits: ['update:modelValue', 'update:field'],
+
+    setup(props, { emit }: any) {
+        const modeInput = computed(() => {
+            if (!props.fieldElement.Currency) {
+                return 'decimal';
             }
-        },
+            return 'currency';
+        });
 
-        emits: ['update:modelValue'],
+        watch(
+            () => props.fieldElement.Value,
+            (newValue) => {
+                emit('update:field', props.fieldElement);
+            }
+        );
 
-        setup(props, { emit }: any) {
-            const modeInput = computed(() => {
-                if (!props.fieldElement.Currency) {
-                    return 'decimal';
-                }
-                return 'currency';
-            })
+        const inputHandle = (input: InputNumberInputEvent) => {
+            props.fieldElement.Value = input.value;
+        }
 
-            return { modeInput };
-        },
-    });
+        return { modeInput, inputHandle };
+    },
+});
 </script>
 
 <style scoped>

@@ -17,70 +17,71 @@
 </template>
 
 <script lang="ts">
-    import { ref, watch, defineComponent, computed } from 'vue';
-    import DatePicker from 'primevue/datepicker';
-    import Skeleton from 'primevue/skeleton';
-    import awLabel from './awLabel.vue';
-    import { FieldElementItem } from '../models/fieldelementitem';
-    export default defineComponent({
-        name: 'awDatePicker',
-        components: { DatePicker, Skeleton, awLabel },
-        props: {
-            fieldElement: {
-                type: FieldElementItem,
-                required: true
+import { ref, watch, defineComponent, computed } from 'vue';
+import DatePicker from 'primevue/datepicker';
+import Skeleton from 'primevue/skeleton';
+import awLabel from './awLabel.vue';
+import { FieldElementItem } from '../models/fieldelementitem';
+export default defineComponent({
+    name: 'awDatePicker',
+    components: { DatePicker, Skeleton, awLabel },
+    props: {
+        fieldElement: {
+            type: FieldElementItem,
+            required: true
+        }
+    },
+
+    emits: ['update:modelValue', 'update:field'],
+
+    setup(props, { emit }: any) {
+        const localValue = ref<Date | string | null>(props.fieldElement.Value);
+        const computedValue = computed({
+            get: () => {
+                // Convert string to Date if necessary  
+                if (typeof props.fieldElement.Value === 'string') {
+                    return new Date(props.fieldElement.Value);
+                }
+                return props.fieldElement.Value;
+            },
+            set: (value) => {
+                props.fieldElement.Value = value;
+                emit('update:modelValue', value);
             }
-        },
+        });
 
-        emits: ['update:modelValue'],
+        const computedMinValue = computed(() => {
+            if (props.fieldElement.MinValue) {
+                return new Date(props.fieldElement.MinValue);
+            }
+            return undefined;
+        })
 
-        setup(props, { emit }: any) {
-            const localValue = ref<Date | string | null>(props.fieldElement.Value);
-            const computedValue = computed({
-                get: () => {
-                    // Convert string to Date if necessary  
-                    if (typeof props.fieldElement.Value === 'string') {
-                        return new Date(props.fieldElement.Value);
-                    }
-                    return props.fieldElement.Value;
-                },
-                set: (value) => {
-                    props.fieldElement.Value = value;
-                    emit('update:modelValue', value);
-                }
-            });
+        const computedMaxValue = computed(() => {
+            if (props.fieldElement.MaxValue) {
+                return new Date(props.fieldElement.MaxValue);
+            }
+            return undefined;
+        })
 
-            const computedMinValue = computed(() => {
-                if (props.fieldElement.MinValue) {
-                    return new Date(props.fieldElement.MinValue);
-                }
-                return undefined;
-            })
+        watch(
+            () => props.fieldElement.Value,
+            (newValue) => {
+                localValue.value = newValue;
+            }
+        );
 
-            const computedMaxValue = computed(() => {
-                if (props.fieldElement.MaxValue) {
-                    return new Date(props.fieldElement.MaxValue);
-                }
-                return undefined;
-            })
+        watch(
+            localValue,
+            (newValue) => {
+                emit('update:modelValue', newValue);
+                emit('update:field', props.fieldElement);
+            }
+        );
 
-            watch(
-                () => props.fieldElement.Value,
-                (newValue) => {
-                    localValue.value = newValue;
-                }
-            );
-
-            watch(
-                localValue,
-                (newValue) => {
-                    emit('update:modelValue', newValue);
-                }
-            );
-
-            return { computedValue, computedMinValue, computedMaxValue };
-        },
-    });
+        return { computedValue, computedMinValue, computedMaxValue };
+    },
+});
 </script>
 
 <style scoped>
