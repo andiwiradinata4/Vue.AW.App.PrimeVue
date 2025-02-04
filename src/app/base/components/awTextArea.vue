@@ -3,32 +3,32 @@
         :required="fieldElement.Required" :loading="fieldElement.Loading" />
     <Skeleton v-if="fieldElement.Loading" height="4rem" />
     <TextArea v-else v-model="fieldElement.Value" :disabled="fieldElement.Disabled"
-        :placeholder="fieldElement.PlaceHolder" :autoResize="true" fluid>
+        :placeholder="fieldElement.PlaceHolder" :autoResize="false" fluid>
     </TextArea>
 </template>
 
 <script lang="ts">
-    import { defineComponent } from 'vue';
-    import TextArea from 'primevue/textarea';
-    import Skeleton from 'primevue/skeleton';
-    import awLabel from './awLabel.vue';
-    import { FieldElementItem } from '../models/fieldelementitem';
-    export default defineComponent({
-        name: 'awTextArea',
-        components: { TextArea, Skeleton, awLabel },
-        props: {
-            fieldElement: {
-                type: FieldElementItem,
-                required: true
-            }
-        },
+import { defineComponent } from 'vue';
+import TextArea from 'primevue/textarea';
+import Skeleton from 'primevue/skeleton';
+import awLabel from './awLabel.vue';
+import { FieldElementItem } from '../models/fieldelementitem';
+export default defineComponent({
+    name: 'awTextArea',
+    components: { TextArea, Skeleton, awLabel },
+    props: {
+        fieldElement: {
+            type: FieldElementItem,
+            required: true
+        }
+    },
 
-        emits: ['update:modelValue'],
+    emits: ['update:modelValue'],
 
-        setup(props, { emit }: any) {
-            return {};
-        },
-    });
+    setup(props, { emit }: any) {
+        return {};
+    },
+});
 </script>
 
 <style scoped>

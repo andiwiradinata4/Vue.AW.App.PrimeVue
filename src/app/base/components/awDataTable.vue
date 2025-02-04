@@ -61,7 +61,7 @@ import { FieldElementItem } from '@/app/base/models/fieldelementitem';
 import { FieldElement } from '@/app/base/models/fieldelement';
 import Skeleton from 'primevue/skeleton';
 import awButton from '@/app/base/components/awButton.vue';
-import DataTable, { type DataTableFilterMeta } from 'primevue/datatable';
+import DataTable from 'primevue/datatable';
 import Column, { type ColumnFilterModelType } from 'primevue/column';
 import ColumnGroup from 'primevue/columngroup';
 import Row from 'primevue/row';
@@ -100,6 +100,7 @@ export default defineComponent({
 
         const generateFilters = () => {
             let f: any = {};
+            multiSortMeta.value = [];
             props.fieldElement.Fields.forEach(e => {
                 if (e.Type.toLowerCase() === 'datetime') {
                     f[e.Name] = { value: null, matchMode: FilterMatchMode.DATE_IS };
@@ -118,7 +119,6 @@ export default defineComponent({
 
         const initFilters = () => {
             filters.value = generateFilters();
-            console.log(filters.value);
         }
 
         const clearFilter = () => {
@@ -161,10 +161,7 @@ export default defineComponent({
         }
 
         const onfilterCallback = (field: FieldElementItem, filterModel: ColumnFilterModelType, filterCallback: () => void) => {
-            // filterModel.value = field.Value
             filterCallback();
-            console.log('onfilterCallback.field', field);
-            console.log('onfilterCallback.filterModel', filterModel);
         }
 
         const onRowSelect = (event: any) => {
@@ -176,20 +173,7 @@ export default defineComponent({
         }
 
         const onSort = async (event: any) => {
-            let sortParams: Array<any> = [];
-            pageFilterLocal.value['SortParams'] = null;
-
             multiSortMeta.value = event.multiSortMeta;
-            multiSortMeta.value.forEach(e => {
-                // console.log('multiSortMeta-Item', e);
-                // console.log('multiSortMeta-Item-field', e.field);
-                // console.log('multiSortMeta-Item-sort', e.order === 1 ? 'ASC' : 'DESC');
-                sortParams.push({ 'Column': e.field, 'Option': e.order === 1 ? 'ASC' : 'DESC' })
-            });
-
-            pageFilterLocal.value['SortParams'] = sortParams;
-            // console.log('pageFilter', pageFilterLocal.value);
-            emit('update:pagefilter', pageFilterLocal.value);
         };
 
         const columnType = (type: string) => {
@@ -204,8 +188,7 @@ export default defineComponent({
             pageFilterLocal.value['FilterParams'] = null;
 
             Object.keys(newValue).forEach((e: any) => {
-                if (newValue[e]['value'] !== null) {
-                    // console.log(e, filters.value[e], filters.value[e]['value']);
+                if (newValue[e]['value'] !== null && newValue[e]['value'] !== '') {
                     filterParams.push({ 'Key': e, 'Option': newValue[e]['matchMode'], 'Value': newValue[e]['value'] })
                 }
             })
@@ -213,8 +196,18 @@ export default defineComponent({
             emit('update:pagefilter', pageFilterLocal.value);
         });
 
+        watch(multiSortMeta, (newValue) => {
+            let sortParams: Array<any> = [];
+            pageFilterLocal.value['SortParams'] = null;
+            newValue.forEach(e => {
+                sortParams.push({ 'Column': e.field, 'Option': e.order === 1 ? 'ASC' : 'DESC' })
+            });
+
+            pageFilterLocal.value['SortParams'] = sortParams;
+            emit('update:pagefilter', pageFilterLocal.value);
+        })
+
         const exportCSV = ($event: MouseEvent) => {
-            console.log(dt.value);
             dt.value.exportCSV();
         };
 
@@ -230,15 +223,7 @@ export default defineComponent({
             emit('update:pagefilter', pageFilterLocal.value);
         };
 
-        const inputNumberHandle = (input: InputNumberInputEvent) => {
-            // console.log('inputNumberHandle', input.originalEvent.srcElement.id)
-        }
-
-        const inputNumberModelValue = (val: any) => {
-            console.log('inputNumberModelValue', val);
-        }
-
-        return { dt, data, filters, onRowSelect, multiSortMeta, onSort, clearFilter, exportCSV, columnType, componentFilters, onfilterCallback, placeholder, pageHandle, totalCount, inputNumberHandle, inputNumberModelValue }
+        return { dt, data, filters, onRowSelect, multiSortMeta, onSort, clearFilter, exportCSV, columnType, componentFilters, onfilterCallback, placeholder, pageHandle, totalCount }
     },
 });
 
